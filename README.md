@@ -19,6 +19,6 @@
 * 可能であれば、速度等を計測して、具体的な効率化度合い、強さを示してください。
 * 納得できるところまでできたところでプルリクを出してください。
 
-[![MSBuild](https://github.com/tpu-game-2025/tick-tack-toe/actions/workflows/msbuild.yml/badge.svg)](https://github.com/tpu-game-2025/tick-tack-toe/actions/workflows/msbuild.yml)
+[![MSBuild](https://github.com/BlueAiu/tick-tack-toe/actions/workflows/msbuild.yml/badge.svg)](https://github.com/BlueAiu/tick-tack-toe/actions/workflows/msbuild.yml)
 
 （↑のソースコードの「tpu-game-2025」を自分のアカウント名に差し替えてください（２か所））
