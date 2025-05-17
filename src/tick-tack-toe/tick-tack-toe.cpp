@@ -13,6 +13,7 @@ private:
 	status s_ = BLANK;
 public:
 	status getStatus() const { return s_; }
+	void setStatus(status s) { s_ = s; }
 
 	bool put(status s) {
 		if (s_ != BLANK) return false;
@@ -33,6 +34,7 @@ public:
 public:
 	enum type {
 		TYPE_ORDERED = 0,
+		TYPE_NEGAMAX
 	};
 
 	static AI* createAi(type type);
@@ -47,11 +49,24 @@ public:
 	bool think(Board& b);
 };
 
+// Nega-Max法
+class AI_Nega_Max : public AI {
+public:
+	AI_Nega_Max() {}
+	~AI_Nega_Max() {}
+
+	int Simurate(Board& b, Mass::status current, int* best_x, int* best_y);
+
+	bool think(Board& b);
+};
+
 AI* AI::createAi(type type)
 {
 	switch (type) {
 	case TYPE_ORDERED:
 		return new AI_ordered();
+	case TYPE_NEGAMAX:
+		return new AI_Nega_Max();
 	default:
 		return new AI_ordered();
 		break;
@@ -63,6 +78,7 @@ AI* AI::createAi(type type)
 class Board
 {
 	friend class AI_ordered;
+	friend class AI_Nega_Max;
 
 public:
 	enum WINNER {
@@ -197,7 +213,7 @@ bool AI_ordered::think(Board& b)
 class Game
 {
 private:
-	const AI::type ai_type = AI::TYPE_ORDERED;
+	const AI::type ai_type = AI::TYPE_NEGAMAX;
 
 	Board board_;
 	Board::WINNER winner_ = Board::NOT_FINISED;
@@ -300,4 +316,52 @@ int main()
 	}
 
 	return 0;
+}
+
+
+bool AI_Nega_Max::think(Board& b) {
+
+	int x = -1, y;
+
+	Simurate(b, Mass::ENEMY, &x, &y);
+
+	if(x < 0) return false;
+
+	return b.mass_[y][x].put(Mass::ENEMY);
+}
+
+int AI_Nega_Max::Simurate(Board& b, Mass::status current, int* best_x = nullptr, int* best_y = nullptr) {
+
+	auto next = (current == Mass::ENEMY) ? Mass::PLAYER : Mass::ENEMY;
+
+	static const int score_win = 10000;
+
+	auto result = b.calc_result();
+	if (result == current) return score_win;
+	if (result == next) return -score_win;
+	if (result == Board::DRAW) return 0;
+
+	int score_max = -score_win - 1;
+
+	for (int y = 0; y < Board::BOARD_SIZE; y++) {
+		for (int x = 0; x < Board::BOARD_SIZE; x++) {
+			auto& m = b.mass_[y][x];
+			if (m.getStatus() != Mass::BLANK) continue;
+
+			m.setStatus(current);
+			int score = -Simurate(b, next);
+			m.setStatus(Mass::BLANK);
+
+
+			if (score_max < score) {
+				score_max = score;
+
+				if (best_x != nullptr) *best_x = x;
+				if (best_y != nullptr) *best_y = y;
+			}
+
+		}
+	}
+
+	return score_max;
 }
