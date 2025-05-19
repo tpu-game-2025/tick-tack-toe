@@ -1,5 +1,6 @@
 ﻿#include <memory>
 #include <iostream>
+#include <chrono>
 
 
 class Mass {
@@ -323,7 +324,15 @@ bool AI_Nega_Max::think(Board& b) {
 
 	int x = -1, y;
 
+	auto start = std::chrono::high_resolution_clock::now();
+
 	Simurate(b, Mass::ENEMY, &x, &y);
+
+	auto end = std::chrono::high_resolution_clock::now();
+	auto duration =
+		std::chrono::duration_cast<std::chrono::milliseconds>
+		(end - start);
+	std::cout << "実行時間: " << duration.count() << "ms\n";
 
 	if(x < 0) return false;
 
