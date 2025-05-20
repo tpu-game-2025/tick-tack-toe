@@ -53,6 +53,9 @@ public:
 
 // Nega-Max法
 class AI_Nega_Max : public AI {
+private:
+	std::map<uint64_t, int> memory;
+
 public:
 	AI_Nega_Max() {}
 	~AI_Nega_Max() {}
@@ -336,6 +339,7 @@ bool AI_Nega_Max::think(Board& b) {
 		std::chrono::duration_cast<std::chrono::milliseconds>
 		(end - start);
 	std::cout << "実行時間: " << duration.count() << "ms\n";
+	std::cout << "記憶している盤面数: " << memory.size() << "個\n";
 
 	if(x < 0) return false;
 
@@ -347,7 +351,6 @@ int AI_Nega_Max::Simurate(Board& b, Mass::status current, int* best_x = nullptr,
 	auto next = (current == Mass::ENEMY) ? Mass::PLAYER : Mass::ENEMY;
 
 	static const int score_win = 10000;
-	static std::map<uint64_t, int> memory;
 
 	auto result = b.calc_result();
 	if (result == current) return score_win;
