@@ -1,6 +1,7 @@
 ﻿#include <memory>
 #include <iostream>
 #include <chrono>
+#include <map>
 
 
 class Mass {
@@ -90,7 +91,7 @@ public:
 	};
 private:
 	enum {
-		BOARD_SIZE = 3,
+		BOARD_SIZE = 4,
 	};
 	Mass mass_[BOARD_SIZE][BOARD_SIZE];
 
@@ -195,6 +196,8 @@ public:
 			std::cout << "＋\n";
 		}
 	}
+
+	uint64_t GetID() const;
 };
 
 bool AI_ordered::think(Board& b)
@@ -344,11 +347,18 @@ int AI_Nega_Max::Simurate(Board& b, Mass::status current, int* best_x = nullptr,
 	auto next = (current == Mass::ENEMY) ? Mass::PLAYER : Mass::ENEMY;
 
 	static const int score_win = 10000;
+	static std::map<uint64_t, int> memory;
 
 	auto result = b.calc_result();
 	if (result == current) return score_win;
 	if (result == next) return -score_win;
 	if (result == Board::DRAW) return 0;
+
+	// 盤面を整数値に変換
+	auto curID = b.GetID();
+	// 盤面評価値が計算済みならそれを返す
+	if (best_x == nullptr && memory.find(curID) != memory.end())
+		return memory[curID];
 
 	int score_max = -score_win - 1;
 
@@ -372,5 +382,23 @@ int AI_Nega_Max::Simurate(Board& b, Mass::status current, int* best_x = nullptr,
 		}
 	}
 
+	// 計算した盤面評価値を記録する
+	memory[curID] = score_max;
+
 	return score_max;
+}
+
+uint64_t Board::GetID() const {
+
+	uint64_t ret = 0;
+
+	for (int y = 0; y < BOARD_SIZE; y++) {
+		for (int x = 0; x < BOARD_SIZE; x++) {
+
+			ret += mass_[y][x].getStatus();
+			ret <<= 2;
+		}
+	}
+
+	return ret;
 }
